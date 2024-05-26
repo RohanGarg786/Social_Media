@@ -1,3 +1,4 @@
+import 'regenerator-runtime/runtime';
 import React, { useEffect, useState } from 'react'
 import { MoreVert,Favorite,FavoriteBorder,ChatBubbleOutline,DeleteOutline } from "@mui/icons-material"
 import "./Post.css"
@@ -8,6 +9,10 @@ import { addCommentOnPost, deletePost, likePost, updatePost } from '../../Action
 import { getFollowingPosts, getMyPosts, loadUser } from '../../Actions/User'
 import User from '../User/User'
 import CommentCard from '../CommentCard/CommentCard'
+import MicIcon from '@mui/icons-material/Mic';
+import PauseIcon from '@mui/icons-material/Pause';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+
 
 
 const Post = ({
@@ -23,6 +28,16 @@ const Post = ({
     isAccount =false,
 }) => {
 
+    const startListening = () => SpeechRecognition.startListening({ continuous: true, language: 'en-IN' });
+    const { transcript, browserSupportsSpeechRecognition } = useSpeechRecognition();
+    if (!browserSupportsSpeechRecognition) {
+        return null
+    }
+
+    const [speechToggle,setSpeechToggle] = useState(false);
+
+    
+    
     const [liked ,setLiked] =useState(false);
     const [likesUser,setLikesUser] =useState(false);
     const [commentValue,setCommentValue]  = useState("");
@@ -30,6 +45,22 @@ const Post = ({
     const [captionValue,setCaptionValue]  = useState(caption);
     const [captionToggle,setCaptionToggle]  = useState(false);
 
+    useEffect(() => {
+        if (speechToggle) {
+            setCommentValue(transcript);
+        }
+    }, [transcript, speechToggle]);
+
+    const speechToText =()=>{
+        setSpeechToggle(!speechToggle);
+
+        if (speechToggle) {
+            SpeechRecognition.stopListening();
+        } else {
+            startListening();
+        }
+    }
+    
 
     const {user} = useSelector((state)=>state.user)
     const dispatch =useDispatch();
@@ -159,6 +190,10 @@ const Post = ({
                     placeholder='Comment Here...'
                     required
                      />
+                     <button onClick={speechToText} style={{ borderRadius:"50%" ,height:"26px" , margin:"5px"}}>
+                     {speechToggle ? <PauseIcon style={{color:"red"}}/>: <MicIcon style={{backgroundColor:"lightgreen", borderRadius:"50%" }} />
+}
+                     </button>
                      <Button type='submit' variant='contained'>Add</Button>
                 </form>
                 {
