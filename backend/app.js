@@ -10,11 +10,6 @@ if(process.env.NODE_ENV !== "production"){
     require("dotenv").config({path:"backend/config/config.env"});
 }
 
-// Example with Express and CORS
-const cors = require('cors');
-app.use(cors({
-  origin: 'https://social-media-v6ur.onrender.com',
-}));
 
 
 app.use(express.json({limit:'50mb'}));
